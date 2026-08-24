@@ -141,7 +141,13 @@ The server:
      - Writes `order_status_history`
      - **Does not** send in-progress SMS
 
-Reconciliation cron (every 2 minutes) can also confirm pending payments if the webhook is delayed.
+Reconciliation runs in-process every **2 minutes** (`jobs/paymentReconciliation.js`) and can also confirm pending payments if the webhook is delayed. For a backup when the API process was down, run:
+
+```bash
+node scripts/reconcilePendingPayments.js
+```
+
+(optional system cron, e.g. hourly).
 
 ### 5. Frontend polls payment status
 
@@ -149,13 +155,15 @@ Reconciliation cron (every 2 minutes) can also confirm pending payments if the w
 GET /api/payments/{externalref}/
 ```
 
+If the payment is still **`pending`** and provider is Moolre, this endpoint **live-reconciles** with the Moolre Payment Status API before returning (so the app updates even when the webhook and “check status” on Moolre’s page were skipped).
+
 **Response:**
 
 ```json
 { "status": "PENDING" }
 ```
 
-Poll until `PAID` (or `FAILED`). When `PAID`, the order may already be `in_progress` (no in-progress SMS).
+Poll until `PAID` (or `FAILED`). When `PAID`, receipt SMS runs for **customer + every active superadmin** (MoMo/USSD); cash full-pay notifies **superadmins only**. The order may already be `in_progress` (no in-progress SMS).
 
 ### 6. Staff completes the order
 

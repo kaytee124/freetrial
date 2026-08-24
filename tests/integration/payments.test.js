@@ -251,6 +251,15 @@ describe('Payments API', () => {
 
   describe('GET /api/payments/{externalref}/', () => {
     it('returns uppercase polling status', async () => {
+      axios.post.mockImplementation((url) => {
+        if (String(url).includes('/open/transact/status')) {
+          return Promise.resolve({
+            data: { data: { txstatus: 0, amount: '15.00', value: '15.00' } },
+          });
+        }
+        return Promise.reject(new Error(`Unexpected URL: ${url}`));
+      });
+
       await Payment.create({
         order_id: order.id,
         externalref: 'PAY-STATUS-001',
@@ -268,6 +277,31 @@ describe('Payments API', () => {
       const res = await request(app).get('/api/payments/PAY-STATUS-001/');
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('PENDING');
+    });
+
+    it('live-reconciles pending moolre payment to PAID', async () => {
+      mockMoolreStatusSuccess(25, 1);
+
+      await Payment.create({
+        order_id: order.id,
+        externalref: 'PAY-STATUS-LIVE-001',
+        amount: 25,
+        status: 'pending',
+        payment_method: 'moolre',
+        provider: 'moolre',
+        currency: 'GHS',
+        metadata: {},
+        created_by: ctx.client.id,
+        created_at: new Date(Date.now() - 3 * 60 * 1000),
+        updated_at: new Date(Date.now() - 3 * 60 * 1000),
+      });
+
+      const res = await request(app).get('/api/payments/PAY-STATUS-LIVE-001/');
+      expect(res.status).toBe(200);
+      expect(res.body.status).toBe('PAID');
+
+      const payment = await Payment.findOne({ where: { externalref: 'PAY-STATUS-LIVE-001' } });
+      expect(payment.status).toBe('paid');
     });
 
     it('returns 404 for unknown externalref', async () => {

@@ -581,14 +581,32 @@ async function handleMoolreWebhook(payload) {
   return { processed: true, status: payment.status };
 }
 
-function getPaymentStatus(externalref) {
-  return Payment.findOne({ where: { externalref } }).then((payment) => {
-    if (!payment) {
-      throw new AppError('NOT_FOUND', 'Payment not found', 404);
+async function getPaymentStatus(externalref) {
+  const payment = await Payment.findOne({ where: { externalref } });
+  if (!payment) {
+    throw new AppError('NOT_FOUND', 'Payment not found', 404);
+  }
+
+  // Live-check Moolre when still pending so FE poll updates without waiting for webhook.
+  if (payment.status === 'pending' && payment.provider === 'moolre') {
+    try {
+      await reconcilePayment(payment);
+    } catch (err) {
+      console.error(
+        JSON.stringify({
+          event: 'payment_status_live_reconcile_error',
+          paymentId: payment.id,
+          externalref: payment.externalref,
+          error: err.message,
+          code: err.errorCode || err.code,
+        })
+      );
     }
-    const status = POLLING_STATUS_MAP[payment.status] || 'FAILED';
-    return { status };
-  });
+    await payment.reload();
+  }
+
+  const status = POLLING_STATUS_MAP[payment.status] || 'FAILED';
+  return { status };
 }
 
 async function reconcilePayment(payment) {

@@ -1435,7 +1435,8 @@ const spec = {
         tags: ['Payments'],
         summary: 'Poll payment status',
         description:
-          'Frontend poll endpoint. Returns DB status updated by webhook or reconciliation cron. Does not call Moolre directly. ' +
+          'Frontend poll endpoint. When the payment is still pending (Moolre provider), live-reconciles with the Moolre Payment Status API, then returns DB status. ' +
+          'Also updated by webhook and the 2-minute reconciliation worker. ' +
           'When status becomes `PAID`, the order may already be `in_progress` and the customer may have received an SMS (if ≥30% threshold was met).',
         parameters: [
           { name: 'externalref', in: 'path', required: true, schema: { type: 'string' } },
