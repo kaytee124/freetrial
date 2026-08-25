@@ -50,6 +50,7 @@ const PROTECTED_ROUTES = [
   { method: 'get', path: '/api/dashboard/revenue-report/' },
   { method: 'get', path: '/api/notifications/pickups/preview/' },
   { method: 'get', path: '/api/notifications/pickups/' },
+  { method: 'post', path: '/api/notifications/sms/clients/', body: {} },
 ];
 
 describe('Security: Route auth matrix', () => {

@@ -18,5 +18,11 @@ router.get(
   isAdminOrSuperadmin,
   asyncHandler(notificationsController.list)
 );
+router.post(
+  '/sms/clients/',
+  authenticate,
+  isAdminOrSuperadmin,
+  asyncHandler(notificationsController.broadcastSms)
+);
 
 module.exports = router;

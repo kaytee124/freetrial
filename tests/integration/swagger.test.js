@@ -91,6 +91,7 @@ describe('Swagger API documentation', () => {
       expect(spec.paths['/api/notifications/pickups/preview/']).toBeDefined();
       expect(spec.paths['/api/accounts/staff/user/{userId}/orders/']).toBeDefined();
       expect(spec.paths['/api/orders/{id}/complete/']).toBeDefined();
+      expect(spec.paths['/api/notifications/sms/clients/']).toBeDefined();
     });
 
     it('defines security schemes', () => {

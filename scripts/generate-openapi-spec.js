@@ -450,6 +450,10 @@ const AUTH_META = {
     security: bearer,
     requiredAuth: `${AUTH_BEARER} Role: admin or superadmin.`,
   },
+  'POST /api/notifications/sms/clients/': {
+    security: bearer,
+    requiredAuth: `${AUTH_BEARER} Role: admin or superadmin.`,
+  },
 };
 
 function authOpKey(path, method) {
@@ -1566,6 +1570,35 @@ const spec = {
         },
       },
     },
+    '/api/notifications/sms/clients/': {
+      post: {
+        tags: ['Notifications'],
+        summary: 'Broadcast personalized SMS to clients (admin or superadmin)',
+        description:
+          'Send one message template to selected client user ids or all active clients. ' +
+          'Placeholders: `{{first_name}}`, `{{last_name}}`, `{{username}}`. Max 480 chars, max 500 recipients. Uses SMS outbox.',
+        security: bearer,
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/StaffBroadcastSmsRequest' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'Broadcast result',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/StaffBroadcastSmsResponse' } },
+            },
+          },
+          400: stdErrors[400],
+          401: stdErrors[401],
+          403: stdErrors[403],
+        },
+      },
+    },
   },
   components: {
     securitySchemes: {
@@ -2137,6 +2170,55 @@ const spec = {
               page_size: { type: 'integer' },
               total_pages: { type: 'integer' },
               results: { type: 'array', items: { $ref: '#/components/schemas/PickupNotification' } },
+            },
+          },
+        },
+      },
+      StaffBroadcastSmsRequest: {
+        type: 'object',
+        required: ['message'],
+        properties: {
+          message: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 480,
+            description: 'Template; optional {{first_name}}, {{last_name}}, {{username}}',
+          },
+          user_ids: {
+            type: 'array',
+            items: { type: 'integer' },
+            description: 'Client user ids (ignored when all_active is true)',
+          },
+          all_active: {
+            type: 'boolean',
+            description: 'If true, message every active client with a usable phone',
+          },
+        },
+      },
+      StaffBroadcastSmsResponse: {
+        type: 'object',
+        properties: {
+          status: { type: 'string' },
+          message: { type: 'string' },
+          data: {
+            type: 'object',
+            properties: {
+              requested: { type: 'integer' },
+              targeted: { type: 'integer' },
+              sent: { type: 'integer' },
+              pending: { type: 'integer' },
+              skipped: { type: 'integer' },
+              failed_permanent: { type: 'integer' },
+              skips: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    user_id: { type: 'integer' },
+                    reason: { type: 'string' },
+                  },
+                },
+              },
             },
           },
         },
@@ -2850,6 +2932,21 @@ function applyDocumentation(openApiSpec) {
               order_status: 'ready',
             },
           ],
+        },
+      },
+    },
+    [opKey('/api/notifications/sms/clients/', 'post')]: {
+      200: {
+        status: 'success',
+        message: 'Broadcast SMS queued',
+        data: {
+          requested: 40,
+          targeted: 38,
+          sent: 35,
+          pending: 2,
+          skipped: 2,
+          failed_permanent: 1,
+          skips: [{ user_id: 9, reason: 'no_phone' }],
         },
       },
     },
