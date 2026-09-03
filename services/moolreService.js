@@ -80,10 +80,10 @@ async function initiatePayment({
   return data;
 }
 
-async function sendSms({ recipient, message, ref }) {
+async function sendSms({ recipient, message, ref, senderId }) {
   const payload = {
     type: 1,
-    senderid: moolreConfig.smsSenderId,
+    senderid: senderId || moolreConfig.smsSenderId,
     messages: [
       {
         recipient,

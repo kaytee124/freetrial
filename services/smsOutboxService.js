@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { SmsOutbox, Customer } = require('../models');
 const moolreService = require('./moolreService');
+const moolreConfig = require('../config/moolre');
 const { formatSmsRecipient } = require('../utils/phone');
 
 /** Due reminders + in-progress SMS are disabled; never retry these outbox rows. */
@@ -11,6 +12,9 @@ const OBSOLETE_SMS_PURPOSES = [
   'order_due_24h_staff',
   'order_in_progress',
 ];
+
+/** Payment receipt SMS uses MOOLRE_SMS_SENDER_ID_2 (KolendoPay). */
+const PAYMENT_SMS_PURPOSES = ['payment_received', 'payment_received_staff'];
 
 const OBSOLETE_PURPOSE_ERROR = 'obsolete_purpose_disabled';
 
@@ -29,6 +33,13 @@ function isPermanentPhoneError(err) {
   const code = String(err?.code ?? '');
   const haystack = `${message} ${code}`;
   return PERMANENT_PHONE_PATTERNS.some((re) => re.test(haystack));
+}
+
+function senderIdForPurpose(purpose) {
+  if (PAYMENT_SMS_PURPOSES.includes(purpose)) {
+    return moolreConfig.smsSenderId2;
+  }
+  return moolreConfig.smsSenderId;
 }
 
 async function markCustomerPhoneNeedsCorrection(relatedType, relatedId) {
@@ -53,6 +64,7 @@ async function attemptSend(row) {
       recipient: row.recipient,
       message: row.message,
       ref: row.ref || undefined,
+      senderId: senderIdForPurpose(row.purpose),
     });
     row.status = 'sent';
     row.sent_at = now;
@@ -186,6 +198,8 @@ module.exports = {
   isPermanentPhoneError,
   OBSOLETE_SMS_PURPOSES,
   OBSOLETE_PURPOSE_ERROR,
+  PAYMENT_SMS_PURPOSES,
+  senderIdForPurpose,
   enqueueSms,
   attemptSend,
   cancelObsoletePendingSms,

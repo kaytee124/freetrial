@@ -27,6 +27,7 @@ module.exports = {
   webhookSecret: requireEnv('MOOLRE_WEBHOOK_SECRET'),
   smsVasKey: requireEnv('MOOLRE_SMS_VAS_KEY'),
   smsSenderId: requireEnv('MOOLRE_SMS_SENDER_ID'),
+  smsSenderId2: requireEnv('MOOLRE_SMS_SENDER_ID_2'),
   merchantEmail: requireEnv('MOOLRE_MERCHANT_EMAIL'),
   apiBase,
   paths,

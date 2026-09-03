@@ -1,9 +1,11 @@
 const moolreService = require('../../services/moolreService');
+const moolreConfig = require('../../config/moolre');
 const { Customer, SmsOutbox } = require('../../models');
 const {
   enqueueSms,
   processPendingSms,
   isPermanentPhoneError,
+  senderIdForPurpose,
 } = require('../../services/smsOutboxService');
 const { uniquePhone } = require('../helpers/fixtures');
 
@@ -25,6 +27,32 @@ describe('SMS outbox', () => {
     });
     expect(result.ok).toBe(true);
     expect(result.row.status).toBe('sent');
+  });
+
+  it('routes payment SMS to sender id 2 and notifications to main sender', async () => {
+    sendSmsSpy = jest.spyOn(moolreService, 'sendSms').mockResolvedValue({ status: 1, message: 'ok' });
+
+    expect(senderIdForPurpose('payment_received')).toBe(moolreConfig.smsSenderId2);
+    expect(senderIdForPurpose('payment_received_staff')).toBe(moolreConfig.smsSenderId2);
+    expect(senderIdForPurpose('welcome')).toBe(moolreConfig.smsSenderId);
+    expect(senderIdForPurpose('order_completed')).toBe(moolreConfig.smsSenderId);
+    expect(senderIdForPurpose('staff_client_broadcast')).toBe(moolreConfig.smsSenderId);
+
+    await enqueueSms({
+      recipient: uniquePhone(),
+      message: 'payment receipt',
+      purpose: 'payment_received',
+      ref: 'pay-sender-1',
+    });
+    expect(sendSmsSpy.mock.calls[0][0].senderId).toBe(moolreConfig.smsSenderId2);
+
+    await enqueueSms({
+      recipient: uniquePhone(),
+      message: 'order ready',
+      purpose: 'order_completed',
+      ref: 'order-sender-1',
+    });
+    expect(sendSmsSpy.mock.calls[1][0].senderId).toBe(moolreConfig.smsSenderId);
   });
 
   it('leaves pending on transient failure and worker sends later', async () => {
@@ -111,5 +139,6 @@ describe('SMS outbox', () => {
 
     expect(sendSmsSpy).toHaveBeenCalledTimes(1);
     expect(sendSmsSpy.mock.calls[0][0].message).toBe('payment ok');
+    expect(sendSmsSpy.mock.calls[0][0].senderId).toBe(moolreConfig.smsSenderId2);
   });
 });

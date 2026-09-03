@@ -70,7 +70,8 @@ Configure in `.env`:
 ### SMS (Moolre)
 
 - `MOOLRE_SMS_VAS_KEY` — `X-API-VASKEY` for Moolre SMS API
-- `MOOLRE_SMS_SENDER_ID` — approved sender ID (max 11 characters)
+- `MOOLRE_SMS_SENDER_ID` — approved sender ID for **notifications** (welcome, order status, broadcast; max 11 characters)
+- `MOOLRE_SMS_SENDER_ID_2` — approved sender ID for **payment** receipts (`payment_received`, `payment_received_staff`), e.g. `KolendoPay`
 
 ### Data
 
@@ -184,7 +185,8 @@ This triggers a **completion SMS** asynchronously:
 
 | Item | Source |
 |------|--------|
-| Sender ID | `MOOLRE_SMS_SENDER_ID` env var |
+| Sender ID (notifications) | `MOOLRE_SMS_SENDER_ID` |
+| Sender ID (payments) | `MOOLRE_SMS_SENDER_ID_2` (e.g. KolendoPay) — purposes `payment_received`, `payment_received_staff` |
 | Recipient | `Customer.phone_number` from DB → formatted to `233XXXXXXXXX` |
 | In-progress message | *(not sent)* |
 | Completed message | `Your order {order_number} is ready for pickup/delivery. Thank you.` |

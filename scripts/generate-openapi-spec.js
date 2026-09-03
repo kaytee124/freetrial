@@ -537,7 +537,7 @@ const spec = {
       '',
       '**Order SMS notifications (side effects)**',
       '- No dedicated SMS endpoint; the server enqueues Moolre SMS via the outbox after certain order changes.',
-      '- Env: `MOOLRE_SMS_VAS_KEY`, `MOOLRE_SMS_SENDER_ID` (see `config/moolre.js`).',
+      '- Env: `MOOLRE_SMS_VAS_KEY`, `MOOLRE_SMS_SENDER_ID` (notifications), `MOOLRE_SMS_SENDER_ID_2` (payment receipts; see `config/moolre.js`).',
       '- Recipient: `Customer.phone_number` from the database (formatted to international `233…`).',
       '- Triggers:',
       '  - **`in_progress`** — staff `PUT /api/orders/{id}/update/` **or** cumulative paid amount ≥ **30%** of `total_amount` while order is still `pending`',

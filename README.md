@@ -39,7 +39,8 @@ Full frontend-to-SMS flow: [docs/payment-and-sms-flow.md](docs/payment-and-sms-f
 Configure in `.env`:
 
 - `MOOLRE_SMS_VAS_KEY` — `X-API-VASKEY` for `POST /open/sms/send`
-- `MOOLRE_SMS_SENDER_ID` — approved sender ID (max 11 characters)
+- `MOOLRE_SMS_SENDER_ID` — approved sender ID for notifications (welcome, orders, broadcast; max 11 characters)
+- `MOOLRE_SMS_SENDER_ID_2` — approved sender ID for payment receipts (e.g. `KolendoPay`; max 11 characters)
 
 SMS is sent automatically when:
 
