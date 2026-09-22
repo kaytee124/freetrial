@@ -8,8 +8,10 @@ const { formatSmsRecipient } = require('../utils/phone');
 const OBSOLETE_SMS_PURPOSES = [
   'order_due_1h',
   'order_due_24h',
+  'order_due_48h',
   'order_due_1h_staff',
   'order_due_24h_staff',
+  'order_due_48h_staff',
   'order_in_progress',
 ];
 

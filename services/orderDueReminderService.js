@@ -47,7 +47,7 @@ function formatDueDisplay(dueAt) {
 }
 
 function buildCustomerDueMessage(orderNumber, dueLabel, kind) {
-  const when = kind === '1h' ? 'in about 1 hour' : 'in about 24 hours';
+  const when = kind === '1h' ? 'in about 1 hour' : 'in about 48 hours';
   return (
     `Bubblebytes: Reminder — order ${orderNumber} is due ${when} ` +
     `(${dueLabel} Accra). Please be ready for pickup/delivery.`
@@ -55,7 +55,7 @@ function buildCustomerDueMessage(orderNumber, dueLabel, kind) {
 }
 
 function buildStaffDueMessage(orderNumber, customerName, dueLabel, kind) {
-  const when = kind === '1h' ? '1 hour' : '24 hours';
+  const when = kind === '1h' ? '1 hour' : '48 hours';
   const who = customerName ? ` for ${customerName}` : '';
   return (
     `Bubblebytes: Order ${orderNumber}${who} is due in ${when} ` +
@@ -129,7 +129,7 @@ async function sendDueReminderSms(order, kind) {
       recipient: order.customer.phone_number,
       message: buildCustomerDueMessage(order.order_number, dueLabel, kind),
       ref: `${order.order_number}-DUE-${kind}-C`,
-      purpose: kind === '1h' ? 'order_due_1h' : 'order_due_24h',
+      purpose: kind === '1h' ? 'order_due_1h' : 'order_due_48h',
       relatedType: 'customer',
       relatedId: order.customer.id,
     });
@@ -150,7 +150,7 @@ async function sendDueReminderSms(order, kind) {
       recipient: phone,
       message: staffMsg,
       ref: `${order.order_number}-DUE-${kind}-U${user.id}`,
-      purpose: kind === '1h' ? 'order_due_1h_staff' : 'order_due_24h_staff',
+      purpose: kind === '1h' ? 'order_due_1h_staff' : 'order_due_48h_staff',
       relatedType: 'user',
       relatedId: user.id,
     });
@@ -165,7 +165,7 @@ async function sendDueReminderSms(order, kind) {
  * Job still runs; this is a no-op so no SMS is sent.
  */
 async function processDueReminders(_now = new Date()) {
-  return { scanned: 0, reminded24h: 0, reminded1h: 0 };
+  return { scanned: 0, reminded48h: 0, reminded1h: 0 };
 }
 
 module.exports = {

@@ -46,9 +46,9 @@ Status SMS: **completed**, schedule change, and pickup remain. **No in-progress 
 
 ### Due reminders (delivery)
 
-Due-reminder SMS (24h / 1h before delivery) is **disabled** for customers and staff. The background job still runs but sends nothing. Staff deadline alerts are **in-app** only (`GET /api/notifications/pickups/…`).
+Due-reminder SMS (48h / 1h before delivery) is **disabled** for customers and staff. The background job still runs but sends nothing. Staff deadline alerts are **in-app** only (`GET /api/notifications/pickups/…`).
 
-Outbox purposes `order_due_1h`, `order_due_24h`, `order_due_1h_staff`, `order_due_24h_staff`, and `order_in_progress` must **not** be retried. `processPendingSms` cancels any leftover pending rows of those purposes as `failed_permanent` (`obsolete_purpose_disabled`). Do not re-enqueue them via catch-up scripts.
+Outbox purposes `order_due_1h`, `order_due_24h`, `order_due_48h`, `order_due_1h_staff`, `order_due_24h_staff`, `order_due_48h_staff`, and `order_in_progress` must **not** be retried. `processPendingSms` cancels any leftover pending rows of those purposes as `failed_permanent` (`obsolete_purpose_disabled`). Do not re-enqueue them via catch-up scripts.
 
 Swagger UI at `/api/docs` documents these endpoints and notes SMS as side effects on payment and order-update operations.
 

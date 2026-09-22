@@ -128,13 +128,22 @@ describe('Payment receipt SMS + due reminders', () => {
 
     const before = await SmsOutbox.count({
       where: {
-        purpose: { [Op.in]: ['order_due_1h', 'order_due_1h_staff', 'order_due_24h', 'order_due_24h_staff'] },
+        purpose: {
+          [Op.in]: [
+            'order_due_1h',
+            'order_due_1h_staff',
+            'order_due_24h',
+            'order_due_24h_staff',
+            'order_due_48h',
+            'order_due_48h_staff',
+          ],
+        },
       },
     });
 
     const first = await processDueReminders(new Date());
     expect(first.reminded1h).toBe(0);
-    expect(first.reminded24h).toBe(0);
+    expect(first.reminded48h).toBe(0);
     expect(first.scanned).toBe(0);
 
     const reloaded = await Order.findByPk(order.id);
@@ -143,7 +152,16 @@ describe('Payment receipt SMS + due reminders', () => {
 
     const after = await SmsOutbox.count({
       where: {
-        purpose: { [Op.in]: ['order_due_1h', 'order_due_1h_staff', 'order_due_24h', 'order_due_24h_staff'] },
+        purpose: {
+          [Op.in]: [
+            'order_due_1h',
+            'order_due_1h_staff',
+            'order_due_24h',
+            'order_due_24h_staff',
+            'order_due_48h',
+            'order_due_48h_staff',
+          ],
+        },
       },
     });
     expect(after).toBe(before);
