@@ -20,7 +20,7 @@ Authorization: Bearer <admin or superadmin access token>
 
 On login / header bell: fetch this. `count` is the badge. `results` is at most **5** rows.
 
-Sort: **missed first** (oldest `delivery_date`), then today’s (`delivery_time`, then `id`).
+Sort: **missed first** (oldest `delivery_date`), then today’s, then **upcoming** (soonest `delivery_date`, then `delivery_time`, then `id`). Includes pickups due **today plus the next two Accra calendar days**.
 
 ```json
 {
@@ -48,6 +48,7 @@ Sort: **missed first** (oldest `delivery_date`), then today’s (`delivery_time`
 |--------|---------|
 | `pickup_today` | `delivery_date` is today; not picked up |
 | `pickup_missed` | `delivery_date` is before today; not picked up (forgot / missed) |
+| `pickup_upcoming` | `delivery_date` is tomorrow or the day after (within 48h / two Accra days) |
 
 There is no mark-as-read. When staff sets `picked_up: true`, the row disappears on the next fetch.
 
@@ -55,7 +56,7 @@ There is no mark-as-read. When staff sets `picked_up: true`, the row disappears 
 
 ## 2. View all — `GET /api/notifications/pickups/`
 
-Same filter and sort as preview (today **and** missed). Paginated.
+Same filter and sort as preview (missed, today, and upcoming within two Accra days). Paginated.
 
 | Query | Notes |
 |-------|--------|
@@ -88,7 +89,7 @@ Staff can mark an order completed from a profile row with `POST /api/orders/{id}
 
 - [ ] Bell only for admin / superadmin
 - [ ] Preview on load; badge = `data.count`
-- [ ] Dropdown shows `results` (≤5); missed kind labelled clearly
+- [ ] Dropdown shows `results` (≤5); missed / today / upcoming labelled clearly
 - [ ] View all uses paginated pickups list (today + missed)
 - [ ] Clicking a row can open `/orders/{order_id}`
 - [ ] Client profile: paginate orders via `.../user/:userId/orders/` without leaving the page

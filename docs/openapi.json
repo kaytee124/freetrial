@@ -6336,7 +6336,7 @@
           "Notifications"
         ],
         "summary": "Pickup notification preview (admin or superadmin)",
-        "description": "**Required auth:** Access JWT — `Authorization: Bearer <access>` (from login response field `access`). Paste in Swagger **Authorize**. Role: admin or superadmin.\n\nBell dropdown: at most 5 pickup alerts (missed first, then due today). `count` is the total (today + missed). Computed from orders with `delivery_date`; no persist.",
+        "description": "**Required auth:** Access JWT — `Authorization: Bearer <access>` (from login response field `access`). Paste in Swagger **Authorize**. Role: admin or superadmin.\n\nBell dropdown: at most 5 pickup alerts (missed first, then today, then upcoming within two Accra days). `count` is the total. Computed from orders with `delivery_date`; no persist.",
         "security": [
           {
             "bearerAuth": []
@@ -6401,7 +6401,7 @@
           "Notifications"
         ],
         "summary": "List pickup notifications (admin or superadmin)",
-        "description": "**Required auth:** Access JWT — `Authorization: Bearer <access>` (from login response field `access`). Paste in Swagger **Authorize**. Role: admin or superadmin.\n\nView-all: paginated pickup alerts for today plus missed prior days. Same sort as preview.",
+        "description": "**Required auth:** Access JWT — `Authorization: Bearer <access>` (from login response field `access`). Paste in Swagger **Authorize**. Role: admin or superadmin.\n\nView-all: paginated pickup alerts for missed, today, and upcoming (delivery_date through today + 2 Accra days). Same sort as preview.",
         "security": [
           {
             "bearerAuth": []
@@ -8298,7 +8298,8 @@
             "type": "string",
             "enum": [
               "pickup_today",
-              "pickup_missed"
+              "pickup_missed",
+              "pickup_upcoming"
             ]
           },
           "order_id": {

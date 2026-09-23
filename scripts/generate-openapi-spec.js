@@ -1537,7 +1537,7 @@ const spec = {
         tags: ['Notifications'],
         summary: 'Pickup notification preview (admin or superadmin)',
         description:
-          'Bell dropdown: at most 5 pickup alerts (missed first, then due today). `count` is the total (today + missed). Computed from orders with `delivery_date`; no persist.',
+          'Bell dropdown: at most 5 pickup alerts (missed first, then today, then upcoming within two Accra days). `count` is the total. Computed from orders with `delivery_date`; no persist.',
         security: bearer,
         responses: {
           200: {
@@ -1554,7 +1554,7 @@ const spec = {
         tags: ['Notifications'],
         summary: 'List pickup notifications (admin or superadmin)',
         description:
-          'View-all: paginated pickup alerts for today plus missed prior days. Same sort as preview.',
+          'View-all: paginated pickup alerts for missed, today, and upcoming (delivery_date through today + 2 Accra days). Same sort as preview.',
         security: bearer,
         parameters: [
           { $ref: '#/components/parameters/page' },
@@ -2134,7 +2134,7 @@ const spec = {
       PickupNotification: {
         type: 'object',
         properties: {
-          kind: { type: 'string', enum: ['pickup_today', 'pickup_missed'] },
+          kind: { type: 'string', enum: ['pickup_today', 'pickup_missed', 'pickup_upcoming'] },
           order_id: { type: 'integer' },
           order_number: { type: 'string' },
           customer_name: { type: 'string', nullable: true },

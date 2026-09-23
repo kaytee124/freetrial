@@ -2,7 +2,7 @@ const request = require('supertest');
 const app = require('../../app');
 const { getTokensForRoles } = require('../helpers/auth');
 const { createService, createOrder } = require('../helpers/fixtures');
-const { accraTodayDate } = require('../../services/pickupNotificationService');
+const { accraTodayDate, accraDateOffset } = require('../../services/pickupNotificationService');
 
 function ymdOffset(baseYmd, days) {
   const d = new Date(`${baseYmd}T00:00:00.000Z`);
@@ -80,9 +80,11 @@ describe('Pickup notifications + client profile orders', () => {
       expect(preview.body.data.count).toBeGreaterThanOrEqual(7);
       expect(preview.body.data.results.length).toBeLessThanOrEqual(5);
       expect(preview.body.data.results.length).toBe(5);
-      expect(preview.body.data.results.every((r) => ['pickup_missed', 'pickup_today'].includes(r.kind))).toBe(
-        true
-      );
+      expect(
+        preview.body.data.results.every((r) =>
+          ['pickup_missed', 'pickup_today', 'pickup_upcoming'].includes(r.kind)
+        )
+      ).toBe(true);
 
       const list = await request(app)
         .get('/api/notifications/pickups/?page=1&page_size=200')
@@ -110,6 +112,55 @@ describe('Pickup notifications + client profile orders', () => {
       expect(page.body.data.page_size).toBe(3);
       expect(page.body.data.results.length).toBe(3);
       expect(page.body.data.total_pages).toBeGreaterThanOrEqual(3);
+    });
+
+    it('includes pickups due in the next 48h (T+1/T+2) and excludes T+3', async () => {
+      const service = await createService(ctx.admin, { name: `Upcoming ${Date.now()}` });
+      const plus1 = accraDateOffset(today, 1);
+      const plus2 = accraDateOffset(today, 2);
+      const plus3 = accraDateOffset(today, 3);
+
+      const soon = await createOrder(ctx.employee, ctx.customer, service, {
+        quantity: 1,
+        unit_price: 10,
+        delivery_date: plus1,
+        delivery_time: '09:00:00',
+        order_status: 'ready',
+      });
+      const later = await createOrder(ctx.employee, ctx.customer, service, {
+        quantity: 1,
+        unit_price: 10,
+        delivery_date: plus2,
+        delivery_time: '11:00:00',
+        order_status: 'ready',
+      });
+      const tooFar = await createOrder(ctx.employee, ctx.customer, service, {
+        quantity: 1,
+        unit_price: 10,
+        delivery_date: plus3,
+        delivery_time: '10:00:00',
+        order_status: 'ready',
+      });
+
+      const list = await request(app)
+        .get('/api/notifications/pickups/?page=1&page_size=200')
+        .set(tokens.admin.headers);
+      expect(list.status).toBe(200);
+      const all = list.body.data.results;
+
+      const soonRow = all.find((r) => r.order_id === soon.id);
+      const laterRow = all.find((r) => r.order_id === later.id);
+      expect(soonRow).toBeDefined();
+      expect(soonRow.kind).toBe('pickup_upcoming');
+      expect(laterRow).toBeDefined();
+      expect(laterRow.kind).toBe('pickup_upcoming');
+      expect(all.find((r) => r.order_id === tooFar.id)).toBeUndefined();
+
+      const todayIdx = all.findIndex((r) => r.kind === 'pickup_today');
+      const upcomingIdx = all.findIndex((r) => r.kind === 'pickup_upcoming');
+      if (todayIdx !== -1 && upcomingIdx !== -1) {
+        expect(todayIdx).toBeLessThan(upcomingIdx);
+      }
     });
   });
 

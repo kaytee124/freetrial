@@ -89,10 +89,11 @@ Sort: **missed first** (oldest `delivery_date`), then today (`delivery_time`, th
 |--------|---------|
 | `pickup_today` | Due today |
 | `pickup_missed` | Due yesterday or earlier (not picked up) |
+| `pickup_upcoming` | Due tomorrow or the next day (within two Accra days) |
 
 ### View all — `GET /api/notifications/pickups/`
 
-Same filter/sort as preview (today **and** missed). Query: `page`, `page_size`.
+Same filter/sort as preview (missed, today, and upcoming within two Accra days). Query: `page`, `page_size`.
 
 Envelope: `{ status, data: { count, page, page_size, total_pages, results } }`.
 

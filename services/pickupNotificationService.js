@@ -6,6 +6,12 @@ function accraTodayDate() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Accra' }).format(new Date());
 }
 
+function accraDateOffset(ymd, days) {
+  const d = new Date(`${ymd}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
 function formatDateOnly(value) {
   if (value == null || value === '') return null;
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
@@ -22,8 +28,9 @@ function formatTime(value) {
 }
 
 function pickupWhere(today) {
+  const horizon = accraDateOffset(today, 2);
   return {
-    delivery_date: { [Op.ne]: null, [Op.lte]: today },
+    delivery_date: { [Op.ne]: null, [Op.lte]: horizon },
     picked_up: false,
     order_status: { [Op.ne]: 'cancelled' },
   };
@@ -31,7 +38,12 @@ function pickupWhere(today) {
 
 function pickupOrder(today) {
   return [
-    [literal(`CASE WHEN delivery_date < '${today}' THEN 0 ELSE 1 END`), 'ASC'],
+    [
+      literal(
+        `CASE WHEN delivery_date < '${today}' THEN 0 WHEN delivery_date = '${today}' THEN 1 ELSE 2 END`
+      ),
+      'ASC',
+    ],
     ['delivery_date', 'ASC'],
     ['delivery_time', 'ASC'],
     ['id', 'ASC'],
@@ -56,7 +68,9 @@ const PICKUP_INCLUDES = [
 
 function formatPickupNotification(order, today) {
   const dateStr = formatDateOnly(order.delivery_date);
-  const kind = dateStr && dateStr < today ? 'pickup_missed' : 'pickup_today';
+  let kind = 'pickup_today';
+  if (dateStr && dateStr < today) kind = 'pickup_missed';
+  else if (dateStr && dateStr > today) kind = 'pickup_upcoming';
   const customerUser = order.customer?.user;
   const customerName = customerUser
     ? [customerUser.first_name, customerUser.last_name].filter(Boolean).join(' ').trim() ||
@@ -104,6 +118,7 @@ async function paginatedPickupNotifications(query) {
 
 module.exports = {
   accraTodayDate,
+  accraDateOffset,
   previewPickupNotifications,
   paginatedPickupNotifications,
   formatPickupNotification,
