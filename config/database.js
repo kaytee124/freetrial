@@ -9,11 +9,29 @@ function poolConfig() {
   };
 }
 
+/**
+ * TLS is required by TiDB Cloud Serverless public endpoints (and recommended
+ * for any remote MySQL). Enabled when DB_SSL=true or the host is a TiDB Cloud
+ * gateway. Node.js trusts the public CA, so no certificate file is needed.
+ */
+function sslEnabled() {
+  if (process.env.DB_SSL !== undefined && process.env.DB_SSL !== '') {
+    return process.env.DB_SSL === 'true';
+  }
+  return /\.tidbcloud\.com$/i.test(requireEnv('DB_HOST'));
+}
+
+function dialectOptions() {
+  const options = { charset: 'utf8mb4' };
+  if (sslEnabled()) {
+    options.ssl = { minVersion: 'TLSv1.2', rejectUnauthorized: true };
+  }
+  return options;
+}
+
 const sharedDialect = {
   dialect: 'mysql',
-  dialectOptions: {
-    charset: 'utf8mb4',
-  },
+  dialectOptions: dialectOptions(),
   logging: false,
 };
 
@@ -43,6 +61,7 @@ module.exports = {
     ...dbCredentials,
     database: requireEnv('DB_NAME_TEST'),
     dialect: 'mysql',
+    dialectOptions: dialectOptions(),
     logging: false,
   },
   production: {

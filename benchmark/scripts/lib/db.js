@@ -3,12 +3,20 @@ require('dotenv').config({ path: require('./paths').ROOT + '/.env' });
 const mysql = require('mysql2/promise');
 const { ROOT } = require('./paths');
 
+function sslEnabled() {
+  if (process.env.DB_SSL !== undefined && process.env.DB_SSL !== '') {
+    return process.env.DB_SSL === 'true';
+  }
+  return /\.tidbcloud\.com$/i.test(process.env.DB_HOST || '');
+}
+
 function getDbConfig(overrides = {}) {
   return {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT, 10) || 3306,
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
+    ssl: sslEnabled() ? { minVersion: 'TLSv1.2', rejectUnauthorized: true } : undefined,
     database:
       overrides.database ||
       process.env.DB_NAME_BENCHMARK ||
