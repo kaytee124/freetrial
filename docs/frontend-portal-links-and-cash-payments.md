@@ -17,7 +17,7 @@ Related docs:
 |------|----------|-----------------|
 | Magic link | SMS opens `{CUSTOMER_APP_URL}/welcome?token=…` (orders add `&next=/orders/{id}`) | Exchange token via welcome-login; follow `next` after optional password change |
 | Cash pay | Staff `POST /api/payments/cash/` | Form: order, amount, payment date; refresh order money fields |
-| Default password | Clients: SMS only (`Kolendo@{username}` + magic link). Staff roles: SMS + `default_password` in create response | Client create UI: no password display. Staff create UI: show returned password and require Ghana `phone_number` |
+| Default password | Clients: SMS only (`Trenor@{username}` + magic link). Staff roles: SMS + `default_password` in create response | Client create UI: no password display. Staff create UI: show returned password and require Ghana `phone_number` |
 | Ghana phone | `0XXXXXXXXX` (10) or `+233XXXXXXXXX` (13) | Reject other formats in forms; show `phone_needs_correction` and block new orders until fixed |
 
 ---
@@ -74,13 +74,13 @@ UI checklist:
 
 ---
 
-## 3. Default passwords (`Kolendo@{username}`)
+## 3. Default passwords (`Trenor@{username}`)
 
 ### Client (staff create)
 
 When staff creates a **client**:
 
-1. Password is set to `Kolendo@{username}`
+1. Password is set to `Trenor@{username}`
 2. Welcome SMS includes magic link + username + that password
 3. API response does **not** include `default_password`
 
@@ -90,7 +90,7 @@ Staff should tell the customer to check SMS; do not display a password from the 
 
 When those roles are created:
 
-1. Password is `Kolendo@{username}`
+1. Password is `Trenor@{username}`
 2. Create body **requires** `phone_number`
 3. SMS sends username + password and asks them to keep credentials secret (**no** magic link)
 4. API still returns `default_password` for the creator
@@ -101,7 +101,7 @@ Example staff create response:
 {
   "message": "Employee created successfully with default password",
   "user": { "id": 12, "username": "jane_doe", "role": "employee" },
-  "default_password": "Kolendo@jane_doe",
+  "default_password": "Trenor@jane_doe",
   "note": "User must change password on first login"
 }
 ```
@@ -116,4 +116,4 @@ Example staff create response:
 - **Don’t** put passwords in magic-link URLs
 - Public self-register is unchanged — user chooses their own password
 
-Existing accounts keep their previous passwords; only **new** creates use `Kolendo@{username}`.
+Existing accounts keep their previous passwords; only **new** creates use `Trenor@{username}`.

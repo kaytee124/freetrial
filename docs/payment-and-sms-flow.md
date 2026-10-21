@@ -65,7 +65,7 @@ Configure in `.env`:
 - `MOOLRE_API_BASE` — API host (e.g. `https://api.moolre.com`)
 - `MOOLRE_MERCHANT_EMAIL` — merchant email for Generate Payment Link
 - `MOOLRE_PATH_EMBED_LINK`, `MOOLRE_PATH_TRANSACT_STATUS`, `MOOLRE_PATH_TRANSACT_PAYMENT`, `MOOLRE_PATH_SMS_SEND` — path suffixes under `MOOLRE_API_BASE`
-- `DEFAULT_CUSTOMER_PASSWORD` — **deprecated**; new staff-created passwords are `Kolendo@{username}` (see [frontend-portal-links-and-cash-payments.md](./frontend-portal-links-and-cash-payments.md))
+- `DEFAULT_CUSTOMER_PASSWORD` — **deprecated**; new staff-created passwords are `Trenor@{username}` (see [frontend-portal-links-and-cash-payments.md](./frontend-portal-links-and-cash-payments.md))
 
 ### SMS (Moolre)
 
@@ -272,7 +272,7 @@ node scripts/recreatePostmanClient.js
 | Field | Value (if recreated locally) |
 |-------|--------|
 | Username | `postman_client` |
-| Password | `Kolendo@postman_client` (welcome SMS includes magic link + this password) |
+| Password | `Trenor@postman_client` (welcome SMS includes magic link + this password) |
 | Phone | `0502412618` |
 | Order ID | `2` (only if that order still exists) |
 | Sample amount | `0.50` or `3.00` (for 30% test on a GHS 10 order) |

@@ -529,7 +529,7 @@ const spec = {
       '',
       '**Account create + SMS**',
       '- Ghana phone format required on create/update: `0XXXXXXXXX` (10) or `+233XXXXXXXXX` (13).',
-      '- **Admin / employee / superadmin create** — `phone_number` is **compulsory**. Credential SMS (username + `Kolendo@{username}`, keep secret). **No** portal magic link. Response includes `default_password`.',
+      '- **Admin / employee / superadmin create** — `phone_number` is **compulsory**. Credential SMS (username + `Trenor@{username}`, keep secret). **No** portal magic link. Response includes `default_password`.',
       '- **Client (staff) create** — welcome SMS with username + password + magic link. Response does **not** include `default_password`.',
       '- Magic login (`POST /api/accounts/welcome-login/`) is **client-only**. See `docs/frontend-welcome-magic-login.md`.',
       '- SMS is written to an **outbox** and sent immediately; transient Moolre failures stay `pending` and are retried every **2 hours**. Permanent invalid-phone errors mark `customers.phone_needs_correction` and are not retried.',
@@ -759,7 +759,7 @@ const spec = {
         tags: ['Accounts'],
         summary: 'Create admin (superadmin only)',
         description:
-          'Creates an admin with temporary password `Kolendo@{username}`. ' +
+          'Creates an admin with temporary password `Trenor@{username}`. ' +
           '`phone_number` is **compulsory**. ' +
           'Sends credential SMS (username + password, keep secret) — no portal magic link. ' +
           'Response includes `default_password` for the creator.',
@@ -823,7 +823,7 @@ const spec = {
         tags: ['Accounts'],
         summary: 'Create employee (admin or superadmin)',
         description:
-          'Creates an employee with temporary password `Kolendo@{username}`. ' +
+          'Creates an employee with temporary password `Trenor@{username}`. ' +
           '`phone_number` is **compulsory**. ' +
           'Sends credential SMS (username + password, keep secret) — no portal magic link. ' +
           'Response includes `default_password` for the creator.',
@@ -928,7 +928,7 @@ const spec = {
         summary: 'Create superadmin',
         description:
           'Public when no superadmin exists (initial bootstrap). After that, requires superadmin Bearer token. ' +
-          '`phone_number` is **compulsory**. Temporary password `Kolendo@{username}` is returned and sent by SMS ' +
+          '`phone_number` is **compulsory**. Temporary password `Trenor@{username}` is returned and sent by SMS ' +
           '(username + password, keep secret; no portal magic link).',
         requestBody: {
           required: true,
@@ -1145,7 +1145,7 @@ const spec = {
         tags: ['Customers'],
         summary: 'Staff creates customer',
         description:
-          'Creates a client with temporary password `Kolendo@{username}`. ' +
+          'Creates a client with temporary password `Trenor@{username}`. ' +
           'Sends welcome SMS (username + password + portal magic link). ' +
           '`default_password` is **not** returned — credentials are SMS-only.',
         security: bearer,
@@ -1804,8 +1804,8 @@ const spec = {
           default_password: {
             type: 'string',
             description:
-              'Temporary password Kolendo@{username}. Also sent by SMS. Magic links are client-only.',
-            example: 'Kolendo@newemployee',
+              'Temporary password Trenor@{username}. Also sent by SMS. Magic links are client-only.',
+            example: 'Trenor@newemployee',
           },
           note: { type: 'string' },
         },
@@ -1987,7 +1987,7 @@ const spec = {
           note: {
             type: 'string',
             description:
-              'Credentials (username + Kolendo@{username} and magic link) are sent by SMS only — not returned in this response',
+              'Credentials (username + Trenor@{username} and magic link) are sent by SMS only — not returned in this response',
           },
         },
       },
@@ -2703,7 +2703,7 @@ function applyDocumentation(openApiSpec) {
   schemas.StaffCreateResponse.example = {
     message: 'Admin created successfully with default password',
     user: { ...EXAMPLE_USER, role: 'admin', is_staff: true },
-    default_password: 'Kolendo@newadmin',
+    default_password: 'Trenor@newadmin',
     note: 'Credentials were also sent by SMS. User should change password on first login',
   };
   schemas.ServiceListResponse.example = {
@@ -2796,7 +2796,7 @@ function applyDocumentation(openApiSpec) {
       201: {
         message: 'Admin created successfully with default password',
         user: { ...EXAMPLE_USER, role: 'admin', is_staff: true },
-        default_password: 'Kolendo@newadmin',
+        default_password: 'Trenor@newadmin',
         note: 'Credentials were also sent by SMS. User should change password on first login',
       },
     },
@@ -2810,7 +2810,7 @@ function applyDocumentation(openApiSpec) {
       201: {
         message: 'Employee created successfully with default password',
         user: { ...EXAMPLE_USER, role: 'employee', is_staff: true },
-        default_password: 'Kolendo@newemployee',
+        default_password: 'Trenor@newemployee',
         note: 'Credentials were also sent by SMS. User should change password on first login',
       },
     },
@@ -2831,7 +2831,7 @@ function applyDocumentation(openApiSpec) {
       201: {
         message: 'Superadmin created successfully with default password',
         user: { ...EXAMPLE_USER, role: 'superadmin', is_superuser: true, is_staff: true },
-        default_password: 'Kolendo@newsuperadmin',
+        default_password: 'Trenor@newsuperadmin',
         note: 'Credentials were also sent by SMS. User should change password on first login',
       },
     },

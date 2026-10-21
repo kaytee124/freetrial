@@ -93,7 +93,7 @@ Staff / employee only. Public self-register is a different route and does **not*
 }
 ```
 
-Credentials (`Kolendo@{username}` + magic link) are sent by SMS only — staff UI must not expect `default_password` on client create.
+Credentials (`Trenor@{username}` + magic link) are sent by SMS only — staff UI must not expect `default_password` on client create.
 
 ### Server side effect (no FE call)
 
@@ -135,7 +135,7 @@ The customer chooses their own password. There is **no** default-password welcom
 
 ## 3. What the frontend does not configure
 
-- No frontend env for `CUSTOMER_APP_URL` / Moolre SMS keys. Default passwords are `Kolendo@{username}` from the create response (not a shared FE constant).
+- No frontend env for `CUSTOMER_APP_URL` / Moolre SMS keys. Default passwords are `Trenor@{username}` from the create response (not a shared FE constant).
 - No public “send SMS” API route — welcome and order SMS are server side effects only.
 - Do not hardcode the customer app host in the staff UI for SMS; the SMS body is built on the server. You may still deep-link your own SPA routes for in-app navigation.
 

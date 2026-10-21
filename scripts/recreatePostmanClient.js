@@ -1,6 +1,6 @@
 /**
  * Delete Postman / 0502412618 clients and recreate postman_client with
- * Kolendo@postman_client + welcome magic-link SMS.
+ * Trenor@postman_client + welcome magic-link SMS.
  *
  * Usage: node scripts/recreatePostmanClient.js
  */
@@ -135,7 +135,7 @@ async function main() {
         phone_needs_correction: false,
         address: 'Postman test address',
         preferred_contact_method: 'phone',
-        notes: 'Recreated with Kolendo@ default password + welcome SMS',
+        notes: 'Recreated with Trenor@ default password + welcome SMS',
         created_at: now,
         updated_at: now,
       },

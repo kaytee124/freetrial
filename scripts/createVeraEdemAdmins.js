@@ -37,7 +37,7 @@ async function main() {
       user_id: user.id,
       role: user.role,
       phone: user.phone_number,
-      password_formula: 'Kolendo@{username}',
+      password_formula: 'Trenor@{username}',
     });
   }
 

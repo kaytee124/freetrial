@@ -27,7 +27,7 @@ When creating **admin**, **employee**, or **superadmin**:
 | Field | Rule |
 |-------|------|
 | `phone_number` | **Compulsory** (Ghana format) — omit/blank/invalid → `400` |
-| SMS | Username + temporary password `Kolendo@{username}` + “keep credentials secret” (outbox + 2h retry) |
+| SMS | Username + temporary password `Trenor@{username}` + “keep credentials secret” (outbox + 2h retry) |
 | Magic link | **None** |
 | API `default_password` | Still returned so the creator can see it |
 
@@ -108,4 +108,4 @@ Token rules (backend):
 
 ## Fallback
 
-If the link expires, welcome SMS includes username + temporary password `Kolendo@{username}` for `POST /api/accounts/login/`. After password change, use the normal login form.
+If the link expires, welcome SMS includes username + temporary password `Trenor@{username}` for `POST /api/accounts/login/`. After password change, use the normal login form.

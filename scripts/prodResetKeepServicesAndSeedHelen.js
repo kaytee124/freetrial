@@ -124,7 +124,7 @@ async function main() {
       {
         event: 'prod_reset_done',
         username: user.username,
-        password_formula: 'Kolendo@{username}',
+        password_formula: 'Trenor@{username}',
         phone,
         role: user.role,
         user_id: user.id,

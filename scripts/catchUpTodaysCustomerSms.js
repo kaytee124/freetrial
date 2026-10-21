@@ -1,6 +1,6 @@
 /**
  * Catch-up SMS for today's customers (Africa/Accra):
- * - login/welcome (fresh magic link + Kolendo@{username})
+ * - login/welcome (fresh magic link + Trenor@{username})
  * - order-received for each order created today
  * - payment receipt for each paid payment today
  * - then retry any still-pending sms_outbox rows from today

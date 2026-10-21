@@ -6,7 +6,7 @@ function buildDefaultPassword(username) {
   if (!username) {
     throw new Error('username is required to build default password');
   }
-  return `Kolendo@${username}`;
+  return `Trenor@${username}`;
 }
 
 module.exports = {

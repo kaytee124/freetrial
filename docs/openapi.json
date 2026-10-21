@@ -3,7 +3,7 @@
   "info": {
     "title": "Bubblebytes Laundry Management API",
     "version": "1.0.0",
-    "description": "REST API for laundry order management, customers, payments, and dashboards.\n\n**Server URL** — resolved from the request host at runtime when viewing Swagger (not `BASE_URL`).\n\n**Success envelope** (most mutations): `{ \"status\": \"success\", \"message\": \"...\", \"data\": { ... } }`\n\n**Error format**: `{ \"error_code\": \"CODE\", \"message\": \"Human-readable message\", \"status_code\": 400 }`\n\n**Authentication**\n1. `GET /api/accounts/csrf/` — sets `csrf_token` cookie and returns the same value in JSON.\n2. **Double-submit CSRF** — login/logout/refresh require BOTH the `csrf_token` cookie AND `X-CSRF-Token` header with the same value.\n3. Swagger UI at `/api/docs` auto-fetches CSRF and injects the header on login/logout/refresh (withCredentials enabled).\n4. Login returns `access` JWT; use `Authorization: Bearer <access>` in Swagger **Authorize**.\n5. Refresh token is stored in HttpOnly cookie (`refresh_token` by default).\n\n**Authentication matrix**\n| Auth type | Header / cookie | Endpoints |\n|-----------|-----------------|-----------|\n| None | — | health, csrf, register, services list, Moolre payment webhook, payment status poll, USSD, token verify (body) |\n| CSRF only | `csrf_token` cookie + `X-CSRF-Token` | login |\n| Access JWT | `Authorization: Bearer <access>` | most `/api/*` routes (see per-operation **Required auth**) |\n| Access JWT + CSRF | Bearer + `X-CSRF-Token` | logout |\n| Refresh + CSRF | `refresh_token` cookie + `X-CSRF-Token` | token refresh |\n\n**Notes**\n- `POST /api/accounts/token/verify/` — JWT in body field `token`, not Bearer header.\n- `POST /api/accounts/superadmin/create/` — no JWT for first bootstrap; superadmin Bearer after.\n- Expired access JWT: if `refresh_token` cookie and `X-CSRF-Token` are present, `authenticate` may silently refresh.\n\n**Account create + SMS**\n- Ghana phone format required on create/update: `0XXXXXXXXX` (10) or `+233XXXXXXXXX` (13).\n- **Admin / employee / superadmin create** — `phone_number` is **compulsory**. Credential SMS (username + `Kolendo@{username}`, keep secret). **No** portal magic link. Response includes `default_password`.\n- **Client (staff) create** — welcome SMS with username + password + magic link. Response does **not** include `default_password`.\n- Magic login (`POST /api/accounts/welcome-login/`) is **client-only**. See `docs/frontend-welcome-magic-login.md`.\n- SMS is written to an **outbox** and sent immediately; transient Moolre failures stay `pending` and are retried every **2 hours**. Permanent invalid-phone errors mark `customers.phone_needs_correction` and are not retried.\n- `POST /api/orders/create/` returns `422 PHONE_NEEDS_CORRECTION` until staff updates the customer phone to a valid Ghana number.\n\n**Order SMS notifications (side effects)**\n- No dedicated SMS endpoint; the server enqueues Moolre SMS via the outbox after certain order changes.\n- Env: `MOOLRE_SMS_VAS_KEY`, `MOOLRE_SMS_SENDER_ID` (notifications), `MOOLRE_SMS_SENDER_ID_2` (payment receipts; see `config/moolre.js`).\n- Recipient: `Customer.phone_number` from the database (formatted to international `233…`).\n- Triggers:\n  - **`in_progress`** — staff `PUT /api/orders/{id}/update/` **or** cumulative paid amount ≥ **30%** of `total_amount` while order is still `pending`\n  - **`completed`** — staff `PUT /api/orders/{id}/update/` with `order_status: completed` **or** `POST /api/orders/{id}/complete/`\n  - **estimated completion date change** — earlier vs later copy when `estimated_completion_date` is updated\n  - **picked up** — when `picked_up` flips to `true`\n- SMS failures do **not** fail payment or order API responses (except order create when phone needs correction).\n- Full frontend-to-SMS flow: see `docs/payment-and-sms-flow.md`.\n\n**Roles**: `superadmin`, `admin`, `employee`, `client`."
+    "description": "REST API for laundry order management, customers, payments, and dashboards.\n\n**Server URL** — resolved from the request host at runtime when viewing Swagger (not `BASE_URL`).\n\n**Success envelope** (most mutations): `{ \"status\": \"success\", \"message\": \"...\", \"data\": { ... } }`\n\n**Error format**: `{ \"error_code\": \"CODE\", \"message\": \"Human-readable message\", \"status_code\": 400 }`\n\n**Authentication**\n1. `GET /api/accounts/csrf/` — sets `csrf_token` cookie and returns the same value in JSON.\n2. **Double-submit CSRF** — login/logout/refresh require BOTH the `csrf_token` cookie AND `X-CSRF-Token` header with the same value.\n3. Swagger UI at `/api/docs` auto-fetches CSRF and injects the header on login/logout/refresh (withCredentials enabled).\n4. Login returns `access` JWT; use `Authorization: Bearer <access>` in Swagger **Authorize**.\n5. Refresh token is stored in HttpOnly cookie (`refresh_token` by default).\n\n**Authentication matrix**\n| Auth type | Header / cookie | Endpoints |\n|-----------|-----------------|-----------|\n| None | — | health, csrf, register, services list, Moolre payment webhook, payment status poll, USSD, token verify (body) |\n| CSRF only | `csrf_token` cookie + `X-CSRF-Token` | login |\n| Access JWT | `Authorization: Bearer <access>` | most `/api/*` routes (see per-operation **Required auth**) |\n| Access JWT + CSRF | Bearer + `X-CSRF-Token` | logout |\n| Refresh + CSRF | `refresh_token` cookie + `X-CSRF-Token` | token refresh |\n\n**Notes**\n- `POST /api/accounts/token/verify/` — JWT in body field `token`, not Bearer header.\n- `POST /api/accounts/superadmin/create/` — no JWT for first bootstrap; superadmin Bearer after.\n- Expired access JWT: if `refresh_token` cookie and `X-CSRF-Token` are present, `authenticate` may silently refresh.\n\n**Account create + SMS**\n- Ghana phone format required on create/update: `0XXXXXXXXX` (10) or `+233XXXXXXXXX` (13).\n- **Admin / employee / superadmin create** — `phone_number` is **compulsory**. Credential SMS (username + `Trenor@{username}`, keep secret). **No** portal magic link. Response includes `default_password`.\n- **Client (staff) create** — welcome SMS with username + password + magic link. Response does **not** include `default_password`.\n- Magic login (`POST /api/accounts/welcome-login/`) is **client-only**. See `docs/frontend-welcome-magic-login.md`.\n- SMS is written to an **outbox** and sent immediately; transient Moolre failures stay `pending` and are retried every **2 hours**. Permanent invalid-phone errors mark `customers.phone_needs_correction` and are not retried.\n- `POST /api/orders/create/` returns `422 PHONE_NEEDS_CORRECTION` until staff updates the customer phone to a valid Ghana number.\n\n**Order SMS notifications (side effects)**\n- No dedicated SMS endpoint; the server enqueues Moolre SMS via the outbox after certain order changes.\n- Env: `MOOLRE_SMS_VAS_KEY`, `MOOLRE_SMS_SENDER_ID` (notifications), `MOOLRE_SMS_SENDER_ID_2` (payment receipts; see `config/moolre.js`).\n- Recipient: `Customer.phone_number` from the database (formatted to international `233…`).\n- Triggers:\n  - **`in_progress`** — staff `PUT /api/orders/{id}/update/` **or** cumulative paid amount ≥ **30%** of `total_amount` while order is still `pending`\n  - **`completed`** — staff `PUT /api/orders/{id}/update/` with `order_status: completed` **or** `POST /api/orders/{id}/complete/`\n  - **estimated completion date change** — earlier vs later copy when `estimated_completion_date` is updated\n  - **picked up** — when `picked_up` flips to `true`\n- SMS failures do **not** fail payment or order API responses (except order create when phone needs correction).\n- Full frontend-to-SMS flow: see `docs/payment-and-sms-flow.md`.\n\n**Roles**: `superadmin`, `admin`, `employee`, `client`."
   },
   "servers": [
     {
@@ -959,7 +959,7 @@
           "Accounts"
         ],
         "summary": "Create admin (superadmin only)",
-        "description": "**Required auth:** Access JWT — `Authorization: Bearer <access>` (from login response field `access`). Paste in Swagger **Authorize**. Role: superadmin.\n\nCreates an admin with temporary password `Kolendo@{username}`. `phone_number` is **compulsory**. Sends credential SMS (username + password, keep secret) — no portal magic link. Response includes `default_password` for the creator.",
+        "description": "**Required auth:** Access JWT — `Authorization: Bearer <access>` (from login response field `access`). Paste in Swagger **Authorize**. Role: superadmin.\n\nCreates an admin with temporary password `Trenor@{username}`. `phone_number` is **compulsory**. Sends credential SMS (username + password, keep secret) — no portal magic link. Response includes `default_password` for the creator.",
         "security": [
           {
             "bearerAuth": []
@@ -1005,7 +1005,7 @@
                     "updated_at": "2026-07-20T12:00:00.000Z",
                     "updated_by": null
                   },
-                  "default_password": "Kolendo@newadmin",
+                  "default_password": "Trenor@newadmin",
                   "note": "Credentials were also sent by SMS. User should change password on first login"
                 }
               }
@@ -1356,7 +1356,7 @@
           "Accounts"
         ],
         "summary": "Create employee (admin or superadmin)",
-        "description": "**Required auth:** Access JWT — `Authorization: Bearer <access>` (from login response field `access`). Paste in Swagger **Authorize**. Role: admin or superadmin.\n\nCreates an employee with temporary password `Kolendo@{username}`. `phone_number` is **compulsory**. Sends credential SMS (username + password, keep secret) — no portal magic link. Response includes `default_password` for the creator.",
+        "description": "**Required auth:** Access JWT — `Authorization: Bearer <access>` (from login response field `access`). Paste in Swagger **Authorize**. Role: admin or superadmin.\n\nCreates an employee with temporary password `Trenor@{username}`. `phone_number` is **compulsory**. Sends credential SMS (username + password, keep secret) — no portal magic link. Response includes `default_password` for the creator.",
         "security": [
           {
             "bearerAuth": []
@@ -1402,7 +1402,7 @@
                     "updated_at": "2026-07-20T12:00:00.000Z",
                     "updated_by": null
                   },
-                  "default_password": "Kolendo@newemployee",
+                  "default_password": "Trenor@newemployee",
                   "note": "Credentials were also sent by SMS. User should change password on first login"
                 }
               }
@@ -1961,7 +1961,7 @@
           "Accounts"
         ],
         "summary": "Create superadmin",
-        "description": "**Required auth:** None for first bootstrap (no superadmin exists). After bootstrap: superadmin access JWT via `Authorization: Bearer <access>`.\n\nPublic when no superadmin exists (initial bootstrap). After that, requires superadmin Bearer token. `phone_number` is **compulsory**. Temporary password `Kolendo@{username}` is returned and sent by SMS (username + password, keep secret; no portal magic link).",
+        "description": "**Required auth:** None for first bootstrap (no superadmin exists). After bootstrap: superadmin access JWT via `Authorization: Bearer <access>`.\n\nPublic when no superadmin exists (initial bootstrap). After that, requires superadmin Bearer token. `phone_number` is **compulsory**. Temporary password `Trenor@{username}` is returned and sent by SMS (username + password, keep secret; no portal magic link).",
         "requestBody": {
           "required": true,
           "content": {
@@ -2001,7 +2001,7 @@
                     "updated_at": "2026-07-20T12:00:00.000Z",
                     "updated_by": null
                   },
-                  "default_password": "Kolendo@newsuperadmin",
+                  "default_password": "Trenor@newsuperadmin",
                   "note": "Credentials were also sent by SMS. User should change password on first login"
                 }
               }
@@ -3310,7 +3310,7 @@
           "Customers"
         ],
         "summary": "Staff creates customer",
-        "description": "**Required auth:** Access JWT — `Authorization: Bearer <access>` (from login response field `access`). Paste in Swagger **Authorize**. Role: staff (admin, employee, or superadmin).\n\nCreates a client with temporary password `Kolendo@{username}`. Sends welcome SMS (username + password + portal magic link). `default_password` is **not** returned — credentials are SMS-only.",
+        "description": "**Required auth:** Access JWT — `Authorization: Bearer <access>` (from login response field `access`). Paste in Swagger **Authorize**. Role: staff (admin, employee, or superadmin).\n\nCreates a client with temporary password `Trenor@{username}`. Sends welcome SMS (username + password + portal magic link). `default_password` is **not** returned — credentials are SMS-only.",
         "security": [
           {
             "bearerAuth": []
@@ -7348,8 +7348,8 @@
           },
           "default_password": {
             "type": "string",
-            "description": "Temporary password Kolendo@{username}. Also sent by SMS. Magic links are client-only.",
-            "example": "Kolendo@newemployee"
+            "description": "Temporary password Trenor@{username}. Also sent by SMS. Magic links are client-only.",
+            "example": "Trenor@newemployee"
           },
           "note": {
             "type": "string"
@@ -7371,7 +7371,7 @@
             "updated_at": "2026-07-20T12:00:00.000Z",
             "updated_by": null
           },
-          "default_password": "Kolendo@newadmin",
+          "default_password": "Trenor@newadmin",
           "note": "Credentials were also sent by SMS. User should change password on first login"
         }
       },
@@ -7866,7 +7866,7 @@
           },
           "note": {
             "type": "string",
-            "description": "Credentials (username + Kolendo@{username} and magic link) are sent by SMS only — not returned in this response"
+            "description": "Credentials (username + Trenor@{username} and magic link) are sent by SMS only — not returned in this response"
           }
         },
         "example": {
